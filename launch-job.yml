@@ -1,0 +1,13 @@
+---
+- name: Configure automation controller
+  hosts: localhost
+  become: false
+  gather_facts: false
+  tasks:
+    - name: Launch a job
+      awx.awx.tower_job_launch:
+        job_template: "apache install"
+      register: job
+    - name: Print job output
+      debug:
+        msg: "{{ job }}"
