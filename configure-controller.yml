@@ -1,0 +1,34 @@
+- name: Add host
+  hosts: localhost
+  tasks:
+    - name: Create an inventory
+      awx.awx.inventory:
+        name: AWX inventory
+        organization: Default
+    - name: add host
+      awx.awx.host:
+        name: "{{ item }}"
+        description: "Local Host Group"
+        inventory: "AWX inventory"
+        state: present
+        variables:
+          example_var: 123
+      with_items:
+        - node3.g2hkv.internal
+        - node2.g2hkv.internal
+        - node1.g2hkv.internal
+    - name: Fetch private key
+      slurp:
+        src: '/home/lab-user/.ssh/g2hkvkey.pem'
+      register: aws_ssh_key
+        
+    - name: Add Credential
+      awx.awx.credential:
+        name: Workshop Credential
+        credential_type: Machine
+        organization: Default
+        inputs:
+          ssh_key_data: "{{ aws_ssh_key['content'] | b64decode }}"
+      run_once: true
+      delegate_to: localhost
+        
